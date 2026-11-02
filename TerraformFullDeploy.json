@@ -1,0 +1,63 @@
+{ 
+  "Version": "2012-10-17", 
+  "Statement": [ 
+    { 
+      "Sid": "RegionLock", 
+      "Effect": "Deny", 
+      "NotAction": ["iam:*", "sts:*", "organizations:Describe*", "support:*"], 
+      "Resource": "*", 
+      "Condition": { "StringNotEquals": { "aws:RequestedRegion": "us-east-1" } } 
+    }, 
+    { "Sid": "Backup", "Effect": "Allow", "Action": ["backup:*", "backup-storage:*"], "Resource": "*" }, 
+    { "Sid": "Monitoring", "Effect": "Allow", 
+      "Action": ["cloudwatch:*", "logs:*", "sns:*", "events:*"], "Resource": "*" }, 
+    { "Sid": "Patching", "Effect": "Allow", "Action": ["ssm:*"], "Resource": "*" }, 
+    { "Sid": "SES", "Effect": "Allow", "Action": ["ses:*"], "Resource": "*" }, 
+    { 
+      "Sid": "ReadOnlyLookups", 
+      "Effect": "Allow", 
+      "Action": ["ec2:Describe*", "rds:Describe*", "rds:ListTagsForResource", 
+                 "elasticloadbalancing:Describe*", "lambda:Get*", "lambda:List*", 
+                 "tag:GetResources", "sts:GetCallerIdentity"], 
+      "Resource": "*" 
+    }, 
+    { 
+      "Sid": "Kms", 
+      "Effect": "Allow", 
+      "Action": ["kms:CreateKey", "kms:CreateAlias", "kms:DeleteAlias", "kms:DescribeKey", 
+                 "kms:GetKeyPolicy", "kms:PutKeyPolicy", "kms:GetKeyRotationStatus", 
+                 "kms:EnableKeyRotation", "kms:ListResourceTags", "kms:TagResource", 
+                 "kms:UntagResource", "kms:ScheduleKeyDeletion", "kms:ListAliases", 
+                 "kms:CreateGrant", "kms:Decrypt", "kms:GenerateDataKey"], 
+      "Resource": "*" 
+    }, 
+    { 
+      "Sid": "IamForStackRolesOnly", 
+      "Effect": "Allow", 
+      "Action": ["iam:CreateRole", "iam:DeleteRole", "iam:GetRole", "iam:TagRole", 
+                 "iam:UntagRole", "iam:UpdateAssumeRolePolicy", "iam:AttachRolePolicy", 
+                 "iam:DetachRolePolicy", "iam:PutRolePolicy", "iam:DeleteRolePolicy", 
+                 "iam:GetRolePolicy", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies", 
+                 "iam:ListInstanceProfilesForRole", "iam:CreatePolicy", "iam:DeletePolicy", 
+                 "iam:GetPolicy", "iam:GetPolicyVersion", "iam:CreatePolicyVersion", 
+                 "iam:DeletePolicyVersion", "iam:ListPolicyVersions"], 
+      "Resource": ["arn:aws:iam::*:role/ccs-*", "arn:aws:iam::*:policy/ccs-*"] 
+    }, 
+    { 
+      "Sid": "PassRoleToAwsServices", 
+      "Effect": "Allow", 
+      "Action": "iam:PassRole", 
+      "Resource": "arn:aws:iam::*:role/ccs-*", 
+      "Condition": { "StringEquals": { "iam:PassedToService": [ 
+        "backup.amazonaws.com", "ssm.amazonaws.com", "events.amazonaws.com", "lambda.amazonaws.com"] } } 
+    }, 
+    { 
+      "Sid": "ServiceLinkedRoles", 
+      "Effect": "Allow", 
+      "Action": "iam:CreateServiceLinkedRole", 
+      "Resource": "*", 
+      "Condition": { "StringLike": { "iam:AWSServiceName": [ 
+        "backup.amazonaws.com", "ssm.amazonaws.com", "ses.amazonaws.com"] } } 
+    } 
+  ] 
+} 
